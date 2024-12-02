@@ -19,12 +19,16 @@ limitations under the License.
 "use strict";
 
 var VIEWER_URL = chrome.runtime.getURL("content/web/viewer.html");
+const USE_DNR = false;
 
 // Use in-memory storage to ensure that the DNR rules have been registered at
 // least once per session. runtime.onInstalled would have been the most fitting
 // event to ensure that, except there are cases where it does not fire when
 // needed. E.g. in incognito mode: https://issues.chromium.org/issues/41029550
 chrome.storage.session.get({ hasPdfRedirector: false }, async items => {
+  if (!USE_DNR) {
+    return;
+  }
   if (items?.hasPdfRedirector) {
     return;
   }
@@ -53,6 +57,9 @@ chrome.storage.session.get({ hasPdfRedirector: false }, async items => {
  * https://github.com/mozilla/pdf.js/blob/0676ea19cf17023ec8c2d6ad69a859c345c01dc1/extensions/chromium/pdfHandler.js#L34-L152
  */
 async function registerPdfRedirectRule() {
+  if (!USE_DNR) {
+    return;
+  }
   // "allow" means to ignore rules (from this extension) with lower priority.
   const ACTION_IGNORE_OTHER_RULES = { type: "allow" };
 
